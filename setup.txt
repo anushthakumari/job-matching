@@ -1,0 +1,12 @@
+install nodejs
+
+run following command to install all the libraries
+"npm install"
+
+run following command to start the server
+"npm start"
+
+tech stack
+Firstore database
+React JS 
+
