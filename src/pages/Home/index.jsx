@@ -1,15 +1,40 @@
 import React, { useState } from "react";
+import axios from "axios";
+
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 
+const BASE_URL = "http://localhost/";
+
 export default function TemporaryDrawer() {
-	const [isopne, setisopne] = useState(false);
+	const [resultData, setresultData] = useState({ isOpen: false, result: "" });
+	const [isLoading, setisLoading] = useState(false);
+	const [text, settext] = useState("");
+
+	const handleClose = () => {
+		setresultData({ isOpen: false, result: "" });
+		settext("");
+	};
+
+	const handleSubmit = async (e) => {
+		try {
+			setisLoading(true);
+			const fd = new FormData();
+			fd.append("text", text);
+			const { data } = await axios.post(BASE_URL + "predict", fd);
+			setresultData({ isOpen: true, result: data.role });
+		} catch (error) {
+			console.log(error);
+			alert("Something went wrong!!");
+		} finally {
+			setisLoading(false);
+		}
+	};
 
 	return (
 		<div>
@@ -77,6 +102,7 @@ export default function TemporaryDrawer() {
 										padding: "0.4rem",
 										borderRadius: "0.5rem",
 									}}
+									onChange={(e) => settext(e.target.value)}
 									minRows={20}
 									min
 								/>
@@ -95,17 +121,18 @@ export default function TemporaryDrawer() {
 										borderRadius: "1rem",
 										alignSelf: "flex-end",
 									}}
-									onClick={() => setisopne(true)}
+									onClick={handleSubmit}
 									disableElevation
+									disabled={isLoading}
 									variant="contained">
-									Process
+									{isLoading ? "Processing..." : "Process"}
 								</Button>
 							</Box>
 						</Box>
 					</Box>
 				</Grid>
 			</Grid>
-			<Drawer anchor={"right"} open={isopne}>
+			<Drawer anchor={"right"} open={resultData.isOpen}>
 				<Box width={"70vw"} height={"100%"}>
 					<Box
 						height={"100%"}
@@ -114,11 +141,11 @@ export default function TemporaryDrawer() {
 						flexDirection={"column"}
 						justifyContent={"center"}>
 						<Typography variant="h5">You are best suited for</Typography>
-						<Typography variant="h2">Data Science Role</Typography>
+						<Typography variant="h2">{resultData.result}</Typography>
 						<Button
 							variant="contained"
 							disableElevation
-							onClick={() => setisopne(false)}
+							onClick={handleClose}
 							sx={{ marginTop: "3rem" }}>
 							Close
 						</Button>
